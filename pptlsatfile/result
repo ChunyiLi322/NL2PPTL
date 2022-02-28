@@ -1,0 +1,27 @@
+初始节点集合: 
+ !(P) || (TRUE ; (TRUE ; (Q)))
+节点集合: 
+ !(P) || (TRUE ; (TRUE ; (Q)))
+ (fin(l1)) ; TRUE ; (Q)
+ (fin(l2)) ; (Q)
+ TRUE
+ EMPTY
+边的集合: 
+ (!(P) || (TRUE ; (TRUE ; (Q))),TRUE,(fin(l1)) ; TRUE ; (Q))
+ (!(P) || (TRUE ; (TRUE ; (Q))),TRUE,(fin(l2)) ; (Q))
+ (!(P) || (TRUE ; (TRUE ; (Q))),(Q) || !(P),TRUE)
+ (!(P) || (TRUE ; (TRUE ; (Q))),(Q) || !(P),EMPTY)
+ ((fin(l1)) ; TRUE ; (Q),TRUE,(fin(l1)) ; TRUE ; (Q))
+ ((fin(l1)) ; TRUE ; (Q),(l1),(fin(l2)) ; (Q))
+ ((fin(l1)) ; TRUE ; (Q),(l1) && (Q),TRUE)
+ ((fin(l1)) ; TRUE ; (Q),(l1) && (Q),EMPTY)
+ ((fin(l2)) ; (Q),TRUE,(fin(l2)) ; (Q))
+ ((fin(l2)) ; (Q),(l2) && (Q),TRUE)
+ ((fin(l2)) ; (Q),(l2) && (Q),EMPTY)
+ (TRUE,TRUE,TRUE)
+ (TRUE,TRUE,EMPTY)
+标记集合 : 
+L1: 
+ (fin(l1)) ; TRUE ; (Q) 
+L2: 
+ (fin(l2)) ; (Q) 

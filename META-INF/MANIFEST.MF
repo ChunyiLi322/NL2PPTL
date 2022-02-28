@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader
+Rsrc-Class-Path: ./ slf4j-api.jar slf4j-simple.jar stanford-chinese-core
+ nlp-2018-10-05-models.jar xom.jar edu.mit.jwi_2.4.0_jdk.jar stanford-co
+ renlp-4.3.0.jar stanford-corenlp-4.3.0-javadoc.jar stanford-corenlp-4.3
+ .0-models.jar stanford-corenlp-4.3.0-sources.jar
+Rsrc-Main-Class: mainPro.MainPro30
+Class-Path: .
+
