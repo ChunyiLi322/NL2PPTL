@@ -1,0 +1,2624 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(FormulaParser)
+
+package formulaParser;
+
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import btree.TreeNode;
+import mainPro.ConfigPath;
+import mainPro.Write2File;
+import stanfordnlp.Demo;
+import java.util.ArrayList;
+import wordnet.GetWordSynsetsTest;
+import pptlsat.PPTLSATRunTime;
+import java.util.HashMap;
+import DrawTree.DrawStandardizedTree;
+import javax.swing.JOptionPane;
+
+public class FormulaParser
+{
+
+  
+  public static TreeNode root=new TreeNode();
+  public static TreeNode root2=new TreeNode();  //根节点
+  public static String return_String = ""; 
+  public static String sub_String = "";
+  public static int nodecount=0;
+   		   /**
+			这里添加添加五元组--------------------------------------
+			*/   
+  public static ArrayList principal_class = new ArrayList();
+  public static ArrayList active_trigger_class = new ArrayList();
+  public static ArrayList attribute_class = new ArrayList();
+   public static ArrayList action_scope_class = new ArrayList();
+   		   /**
+			-------------------------------------------------------
+			*/   
+  public static String formula = "";
+  public static String formula2 = "";
+  public static HashMap<String,String> hashmap;
+  public static HashMap<String,String> hashmap2;
+  public static int principal_class_count = 0;
+  public static FormulaParser parser = null;
+  
+  public static HashMap<String,String> main(String args []) throws ParseException,IOException
+  {
+    Demo stanforddemo =new Demo();
+    String sentence= null;
+    InputStream is = null;
+    hashmap = null;
+    hashmap2 =null;
+ 		   /**
+			这里添加添加五元组-------------------------------------------------
+			*/   
+    String principal_class_Write_In_String = "";
+    String active_trigger_class_Write_In_String ="";
+    String attribute_class_Write_In_String ="";
+    String action_scope_class_Write_In_String ="";
+     		   /**
+			----------------------------------------------------------
+			*/   
+    String sargs=args[0];
+    		   /**
+			下面两句，用来打印生成的二叉树和可视化二叉树
+			*/
+    is= stanforddemo.toStanfordmark(sargs);
+    if(parser==null)
+    {
+      parser = new FormulaParser(is);
+     }else
+     {
+       ReInit(is);
+       }
+    
+      System.out.println("Reading from standard input...");
+      System.out.print("Enter an expression like \"when..if.....\" :");
+      try
+      {
+        switch (FormulaParser.sentence())
+        {
+          case 0 :
+          System.out.println(return_String);
+          System.out.println("OK.");
+          return_String = "";
+          sub_String = "";
+		  hashmap=new HashMap<String,String>();
+		  hashmap2=new HashMap<String,String>();
+		   /**
+			下面两句，用来打印生成的二叉树和可视化二叉树
+			*/
+          root2=root;
+		  DrawStandardizedTree draw_tree = new DrawStandardizedTree(root);
+		  draw_tree.console_print_tree(root,1);		
+		  formula=printtree(root);
+		  formula2=printtree2(root2);
+          System.out.println("formula:  "+formula);
+          System.out.println("formula2:  "+formula2);
+          System.out.println("主体类:  ");
+
+            /**
+			这里添加添加五元组----------------------------------------------------------------------
+			*/   
+//          write_to_file("主语类",principal_class,principal_class_Write_In_String,"store_principal_class","principal");
+//          write_to_file("主动触发类",active_trigger_class,active_trigger_class_Write_In_String,"store_active_trigger_class","active_trigger");
+//          write_to_file("作用域类",action_scope_class,action_scope_class_Write_In_String,"action_scope_class","action_scope");
+//          write_to_file("属性类",attribute_class,attribute_class_Write_In_String,"attribute_class","attribute");
+
+     		  /**
+			---------------------------------------------------------------------------------------------------
+			*/   
+		  System.out.println("细粒度hashmap2:  "+hashmap2);
+          hashmap.put("PPTLformula",formula);
+          hashmap.put("PPTLformula_Fine_grained",formula2);		
+          break;
+          case 1 : 
+          System.out.println("Goodbye.");
+          break;
+          default : 
+        }
+      }
+      catch (Exception e)
+      {
+        System.out.println("NOK.");       
+        System.out.println(e.getMessage());
+        hashmap = null;
+      }
+      catch (Error e)
+      {
+        System.out.println("Oops.");
+        System.out.println(e.getMessage());
+      }
+//    }
+//	return formula; 
+	return hashmap;
+
+
+  }
+
+
+
+
+
+
+/**
+**************************************************************************
+****此方法为构建返回字符串
+    输入为   将句子1，节点单词标签1，节点单词值
+	输出为   句子2  ， 句子2 =句子+ 加空格+节点单词值
+*/
+  
+
+  public static String appendString(String clause,String biaoji,String value)
+  {
+    return clause+" "+value;
+  }
+
+  /**
+**************************************************************************
+***  可视化逻辑树
+**** lichunyi 12-14
+*/
+
+
+
+  /**
+**************************************************************************
+加入  whenever  if  的情况
+补充  next 的情况
+*/
+
+
+
+
+  public static String printtree(TreeNode root)
+  {
+    //后序遍历
+    String formula="";
+    String leftformula="";
+    String rightformula="";
+    String fine_grained_principal_class="";
+    String fine_grained_active_trigger_class="";
+    String formula2="";
+    if(root.svalue != null){
+      if(root.left!=null){
+         leftformula=printtree(root.left);
+         }
+      if(root.right!=null){
+		 rightformula=printtree(root.right);
+		 }
+	  if(root.type==0) //打印子句 转换成命题
+		{
+		  //char x=(char)((int)'P'+root.ivalue);
+		  char x_P=(char)((int)'P');
+          String x=x_P+""+root.ivalue;
+		  String temporal="";
+		  hashmap.put(x+"",root.svalue);
+		  switch(root.mark)
+		  {
+		    case 1: temporal="[]"+x;
+		    	break;
+		    case 2: temporal="<>"+x;
+		    	break;
+		    case 3: temporal="(fin("+x+"))";
+		    	break;
+		    case 4: temporal="()"+x;
+		    	break;
+		    case -1: temporal=""+x;
+		    	break;
+		    }
+		  	formula=temporal;
+			System.out.println(temporal+":  "+root.svalue);
+		}else
+		{
+		  System.out.println("subordinator / conjunction "+root.svalue);
+		  if(root.svalue.equals("when")||root.svalue.equals("When"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    
+		  }
+		  if(root.svalue.equals("whenever")||root.svalue.equals("Whenever"))
+		  {
+		    formula="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		    
+		  }
+		  if(root.svalue.equals("after")||root.svalue.equals("After"))
+		  {
+		    formula="( "+rightformula+" ) -> <>( "+leftformula+" )";
+		    
+		  }
+		  if(root.svalue.equals("until")||root.svalue.equals("Until"))
+		  {
+		    formula="( "+rightformula+" ) until ( "+leftformula+" )";
+		    
+		  }
+		  if(root.svalue.equals("before")||root.svalue.equals("before"))
+		  {
+		    formula="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		    
+		  }
+		   if(root.svalue.equals("while")||root.svalue.equals("while"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    
+		  }
+		  else if(root.svalue.equals("if")||root.svalue.equals("If"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    
+		  }
+		  else if(root.svalue.equals("and"))
+		  {
+		    formula="( "+leftformula+" ) && ( "+rightformula+" )";
+		    
+		  }
+		   else if(root.svalue.equals("or"))
+		  {
+		    formula="( "+leftformula+" ) || ( "+rightformula+" )";
+		    
+		  }
+		  else if(root.svalue.equals("then"))
+		  {
+		    formula="( "+leftformula+" ) ; ( "+rightformula+" )";
+		    
+		  }
+		  else if(root.svalue.equals("next"))
+		  {
+		    formula="( "+leftformula+" ) ; ( "+rightformula+" )";
+		    
+		  }
+		   else if(root.svalue.equals("Start"))
+		  {
+		    if(rightformula != null && ! rightformula.equals("")) {
+		      formula="( " + leftformula + " , " + rightformula + " )";
+		      
+		    }else {
+		      formula="( " + leftformula + " )";
+		      
+		    }
+		  }
+		  else if(root.svalue.equals("End"))
+		  {
+		    if(rightformula != null && ! rightformula.equals("")) {
+		      formula="( " + leftformula + " , " + rightformula + " )";
+		      
+		    }else {
+		      formula="( " + leftformula + " )";
+		      
+		    }
+		  }
+		  else if(root.svalue.equals("prj"))
+		  {
+		    formula="( " + leftformula + " )" +" prj " + rightformula;
+		    
+		  }
+		  else if(root.svalue.equals("mainClause"))
+		  {
+		    formula=leftformula +" && " + rightformula;
+		    
+		  }
+		  else if(root.svalue.equals("subordinateClause"))
+		  {
+		    if(leftformula != null && ! leftformula.equals("")&&rightformula != null && ! rightformula.equals("")) {
+		      formula= leftformula + " && " + rightformula  ;
+		      
+		    }else {
+		      formula= leftformula +rightformula;
+		      
+		    }
+		  }
+		  else if(root.svalue.equals("Which")||root.svalue.equals("which")||root.svalue.equals("That")||root.svalue.equals("that"))
+		  {
+		    formula=leftformula + rightformula;
+		    
+		  }
+		  else if(root.svalue.equals("clauseObject")||root.svalue.equals("clauseSubject"))
+		  {
+		    if(leftformula != null && ! leftformula.equals("")&&rightformula != null && ! rightformula.equals("")) {
+		      formula= leftformula + "&&" + rightformula;
+		      
+		    }else {
+		      formula=leftformula+rightformula;
+		     
+		    }
+		  }
+		}
+		
+	}
+	System.out.println("输出formula公式为："+formula);
+	System.out.println("输出formula2公式为："+formula2);
+	return formula;
+  }
+
+
+
+
+
+
+  /**
+**************************************************************************
+细粒度打印
+*/
+
+
+
+  public static String printtree2(TreeNode root)
+  {
+    //后序遍历
+    String formula="";
+    String leftformula="";
+    String rightformula="";
+       		   /**
+			这里添加添加五元组--------------------------------------
+			*/  
+    String fine_grained_principal_class="";
+    String fine_grained_active_trigger_class="";
+    String fine_grained_attribute_class="";
+    String fine_grained_action_scope_class="";
+       		   /**
+			这里添加添加五元组--------------------------------------
+			*/  
+    String formula2="";
+    if(root.svalue != null){
+      if(root.left!=null){
+         leftformula=printtree2(root.left);
+         }
+      if(root.right!=null){
+		 rightformula=printtree2(root.right);
+		 }
+	  if(root.type==0) //打印子句 转换成命题
+		{
+		  //char x=(char)((int)'P'+root.ivalue);
+		  char x_P=(char)((int)'P');
+          String x=x_P+""+root.ivalue;
+		  String temporal="";
+		  hashmap.put(x+"",root.svalue);
+		     		   /**
+			这里添加添加五元组--------------------------------------
+			*/  
+		  fine_grained_principal_class= principal_class.get(principal_class_count).toString();
+		  fine_grained_active_trigger_class= active_trigger_class.get(principal_class_count).toString();
+		  fine_grained_attribute_class= attribute_class.get(principal_class_count).toString();
+          fine_grained_action_scope_class= action_scope_class.get(principal_class_count).toString();
+		  
+		  principal_class_count++;
+
+
+		  
+		  hashmap2.put(fine_grained_principal_class+"___"+fine_grained_active_trigger_class
+		  +"___"+fine_grained_attribute_class+"___"+fine_grained_action_scope_class,root.svalue);
+		  String y =fine_grained_principal_class+"___"+fine_grained_active_trigger_class
+		  +"___"+fine_grained_attribute_class+"___"+fine_grained_action_scope_class;
+		     		   /**
+			这里添加添加五元组--------------------------------------
+			*/  
+		  switch(root.mark)
+		  {
+		    case 1: temporal="[]"+x;
+		    	break;
+		    case 2: temporal="<>"+x;
+		    	break;
+		    case 3: temporal="(fin("+x+"))";
+		    	break;
+		    case 4: temporal="()"+x;
+		    	break;
+		    case -1: temporal=""+x;
+		    	break;
+		    }
+		  	formula=temporal;
+		  switch(root.mark)
+		  {
+		    case 1: temporal="[]"+y;
+		    	break;
+		    case 2: temporal="<>"+y;
+		    	break;
+		    case 3: temporal="(fin("+y+"))";
+		    	break;
+		    case 4: temporal="()"+y;
+		    	break;
+		    case -1: temporal=""+y;
+		    	break;
+		    }
+		  	formula2=temporal;
+			System.out.println(temporal+":  "+root.svalue);
+		}else
+		{
+		  System.out.println("subordinator / conjunction "+root.svalue);
+		  if(root.svalue.equals("when")||root.svalue.equals("When"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		  }
+		  if(root.svalue.equals("whenever")||root.svalue.equals("Whenever"))
+		  {
+		    formula="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		  }
+		  if(root.svalue.equals("after")||root.svalue.equals("After"))
+		  {
+		    formula="( "+rightformula+" ) -> <>( "+leftformula+" )";
+		    formula2="( "+rightformula+" ) -> <>( "+leftformula+" )";
+		  }
+		  if(root.svalue.equals("until")||root.svalue.equals("Until"))
+		  {
+		    formula="( "+rightformula+" ) until ( "+leftformula+" )";
+		    formula2="( "+rightformula+" ) until ( "+leftformula+" )";
+		  }
+		  if(root.svalue.equals("before")||root.svalue.equals("before"))
+		  {
+		    formula="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) -> <>( "+rightformula+" )";
+		  }
+		   if(root.svalue.equals("while")||root.svalue.equals("while"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		  }
+		  else if(root.svalue.equals("if")||root.svalue.equals("If"))
+		  {
+		    formula="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) -> ()( "+rightformula+" )";
+		  }
+		  else if(root.svalue.equals("and"))
+		  {
+		    formula="( "+leftformula+" ) && ( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) && ( "+rightformula+" )";
+		  }
+		   else if(root.svalue.equals("or"))
+		  {
+		    formula="( "+leftformula+" ) || ( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) || ( "+rightformula+" )";
+		  }
+		  else if(root.svalue.equals("then"))
+		  {
+		    formula="( "+leftformula+" ) ; ( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) ; ( "+rightformula+" )";
+		  }
+		  else if(root.svalue.equals("next"))
+		  {
+		    formula="( "+leftformula+" ) ; ( "+rightformula+" )";
+		    formula2="( "+leftformula+" ) ; ( "+rightformula+" )";
+		  }
+		   else if(root.svalue.equals("Start"))
+		  {
+		    if(rightformula != null && ! rightformula.equals("")) {
+		      formula="( " + leftformula + " , " + rightformula + " )";
+		      formula2="( " + leftformula + " , " + rightformula + " )";
+		    }else {
+		      formula="( " + leftformula + " )";
+		      formula2="( " + leftformula + " )";
+		    }
+		  }
+		  else if(root.svalue.equals("End"))
+		  {
+		    if(rightformula != null && ! rightformula.equals("")) {
+		      formula="( " + leftformula + " , " + rightformula + " )";
+		      formula2="( " + leftformula + " , " + rightformula + " )";
+		    }else {
+		      formula="( " + leftformula + " )";
+		      formula2="( " + leftformula + " )";
+		    }
+		  }
+		  else if(root.svalue.equals("prj"))
+		  {
+		    formula="( " + leftformula + " )" +" prj " + rightformula;
+		    formula2="( " + leftformula + " )" +" prj " + rightformula;
+		  }
+		  else if(root.svalue.equals("mainClause"))
+		  {
+		    formula=leftformula +" && " + rightformula;
+		    formula2=leftformula +" && " + rightformula;
+		  }
+		  else if(root.svalue.equals("subordinateClause"))
+		  {
+		    if(leftformula != null && ! leftformula.equals("")&&rightformula != null && ! rightformula.equals("")) {
+		      formula= leftformula + " && " + rightformula  ;
+		      formula2= leftformula + " && " + rightformula  ;
+		    }else {
+		      formula= leftformula +rightformula;
+		      formula2= leftformula +rightformula;
+		    }
+		  }
+		  else if(root.svalue.equals("Which")||root.svalue.equals("which")||root.svalue.equals("That")||root.svalue.equals("that"))
+		  {
+		    formula=leftformula + rightformula;
+		    formula2=leftformula + rightformula;
+		  }
+		  else if(root.svalue.equals("clauseObject")||root.svalue.equals("clauseSubject"))
+		  {
+		    if(leftformula != null && ! leftformula.equals("")&&rightformula != null && ! rightformula.equals("")) {
+		      formula= leftformula + "&&" + rightformula;
+		      formula2= leftformula + "&&" + rightformula;
+		    }else {
+		      formula=leftformula+rightformula;
+		      formula2=leftformula+rightformula;
+		    }
+		  }
+		}
+		
+	}
+	System.out.println("输出formula公式为："+formula);
+	System.out.println("输出formula2公式为："+formula2);
+	return formula2;
+  }
+
+  /**
+**************************************************************************
+同义词
+*/
+  
+
+  public static int WordSynsets(String word) throws IOException{
+    System.out.println("word1  "+word);
+    if(word.equals("eventually")) {//对eventually 单独处理
+      return 2;
+    }
+
+    
+    ArrayList<String> synWords=new ArrayList<String>();
+    ArrayList<String> synWords1=new ArrayList<String>();
+    ArrayList<String> synWords2=new ArrayList<String>();
+    ArrayList<String> synWords3=new ArrayList<String>();
+    GetWordSynsetsTest getWordSynsetsTest=new GetWordSynsetsTest();
+    try {
+      synWords=getWordSynsetsTest.GetWordSynsets(word);
+    }catch(Exception e)
+     {
+        System.out.println("catch(IOException e)  ");
+        return -1;
+      // e.printStackTrace();
+       }
+    System.out.println("catch(IOException e) 1 ");
+   
+    synWords1=getWordSynsetsTest.GetWordSynsets("always");
+    
+    synWords2=getWordSynsetsTest.GetWordSynsets("sometimes");
+     
+    synWords3=getWordSynsetsTest.GetWordSynsets("finally");
+   
+//    for(int i=0;i<synWords.size();i++)
+//    {
+//      System.out.println("syn  "+synWords.get(i));
+//    }
+
+	synWords1.retainAll(synWords);
+	synWords2.retainAll(synWords);
+	synWords3.retainAll(synWords);
+	System.out.println("catch(IOException e) 2 ");
+	System.out.println("word  "+word);
+	if(synWords1.size() >0)
+	{
+	  return 1;
+	}
+	else if(synWords2.size() >0)
+	{
+	  return 2;
+	}
+	else if(synWords3.size() >0)
+	{
+	  return 3;
+	}
+    return -1;
+  }
+
+/**
+*******************************************************************************************
+*这里是temporal中的返回string与预置的几个词做匹配，
+*mark=1 对应的是[]逻辑符号
+*mark=2 对应的是< >逻辑符号
+*mark=3 对应的是fin()逻辑符号
+*mark=4 对应的是()逻辑符号
+*mark=-1 没有对应逻辑符号
+*
+*更改default内容，如果副词，介词等不表示时序内容，我们应将它还原回原句子中，不应该直接删除
+*  即增加 sub_String=appendString(sub_String,"< temporal >",word);
+*
+*/
+
+
+  
+
+public static int prepWords(String word){
+     int  mark=-1;
+   switch (word)
+   {
+     case "all the time":
+     case "at all times": mark= 1; break;
+     case "at times":
+     case "at a time":
+     case "from time to time":
+     case "now and then":
+     case "at whiles":
+     case "in the future":
+     case "on occasion":mark= 2;break;
+     case "in the end": mark= 3;break;
+     case "in the next state":
+     case "in the next time":
+     case "on the next state": mark= 4;break;
+     default: sub_String=appendString(sub_String,"< temporal >",word); break;
+   }
+   return mark;
+  }
+
+/**
+**************************************************************************
+****此方法为将五元组信息输入到文本中
+*/
+
+public static  void write_to_file(String write_chinese_name, ArrayList active_trigger_class, String active_trigger_class_Write_In_String,String store_path, String write_English_name)
+{
+  System.out.println(write_chinese_name+":  ");
+  for(int i = 0 ; i<active_trigger_class.size();i++){
+	 System.out.println(active_trigger_class.get(i));
+	 active_trigger_class_Write_In_String =active_trigger_class_Write_In_String +"\t"+ active_trigger_class.get(i);
+	 Write2File.WriteIn(active_trigger_class_Write_In_String,ConfigPath.change_path(store_path),write_English_name);
+	}
+  
+}
+
+
+  
+}
+
+
+
+
+
+
+
+PARSER_END(FormulaParser)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+/**
+*******************************************************************************************
+*Chunyi li
+*token添加人称代词  < PRP  : "PRP" >
+*去掉<BE><ARE><IS> 关键词的声明
+*需要添加 VBZ  VBZ来区分时态
+*需要补充after相关含义
+*加入NNP
+*去掉whenever关键字
+添加JJR
+*/
+
+
+
+TOKEN : /*关键字*/
+{
+ < ONCE : "once" >
+| < WHILE : "while" >
+//| < BEFORE : "before" >
+| < LESS : "less" >
+//| < THAN : "than" >
+| < TURN : "turn" >
+| < OFF : "off" >
+| < WRB  : "WRB" >
+| < WDT  : "WDT" >
+| < NN  : "NN" >
+| < NNS  : "NNS" >
+| < NNP  : "NNP" >
+| < CD : "CD" > //基数词
+| < CC : "CC" >
+| < RBS : "RBS" >
+| < MD : "MD" >
+| < VB : "VB" >
+| < VBD : "VBD" >
+| < VBG : "VBG" >
+| < VBN : "VBN" >
+| < VBP : "VBP" >
+| < VBZ : "VBZ" >
+| < IN : "IN" >
+| < JJ : "JJ" >
+| < JJS : "JJS" >
+| < JJR : "JJR" >
+| < RB : "RB" >
+| < START : "Start" >
+| < MONITORING : "Monitoring" >
+| < WITH : "With" >
+| < END : "End" >
+| < DT : "DT" > //限定词
+| < PDT : "PDT" > //前置限定词
+| < RP : "RP" > //particle 小品词
+| < PRP  : "PRP" >
+| < TOPRE : "TO" >
+| < HYPH : "HYPH" >
+}
+
+/**
+补充数字开头 例如3GPP
+*/
+
+TOKEN : /*变量名*/
+{
+  < IDENTIFIER :
+  < DIGIT >
+   (< DIGIT >)* 
+| 
+    < LETTER >
+    (
+      < LETTER >
+    | [ "0"-"9" ] (< DIGIT >)* ("%")?
+    )*
+|   [ "0"-"9" ] (["A"-"Z"])*(["a"-"z"])*
+|   [ "0"-"9" ] (["A"-"Z"])*(["0"-"9"])*(["a"-"z"])*(["0"-"9"])*
+|   (["0"-"9"])*["."](["0"-"9"])*["."](["0"-"9"])*
+|   ["-"]
+|   ["/"]
+    >
+| < LETTER : [ "A"-"Z", "_", "a"-"z" ]|[ "A"-"Z", "-", "a"-"z" ] >
+| < DIGIT : [ "0"-"9" ] >
+}
+
+
+
+
+TOKEN :/*常量*/
+{
+ < BOOL_LITERAL : "true" | "flase" >
+}
+
+  /**
+**************************************************************************
+大句子分成完整小句子
+*/
+
+
+
+int sentence() :
+{
+  TreeNode subclauses=new TreeNode();
+   TreeNode clauses=new TreeNode();
+   TreeNode subclause1=new TreeNode();
+   TreeNode subclauseS=new TreeNode();
+   TreeNode subclauseE=new TreeNode();
+   String conjunctionsvalue="";
+}
+
+{
+(
+	(   
+	 markprjS()
+	)
+	(
+	 subclauseS = subclauses()
+	)
+	(   
+	","  markprjE()
+	)
+	(
+	subclauseE = subclauses()
+	)
+	 (".")
+	 {
+	     TreeNode prjConjunction=new TreeNode();
+     	 prjConjunction.type=1;
+     	 prjConjunction.svalue="prj";
+     	 prjConjunction.left=subclauseS;
+     	 prjConjunction.right=subclauseE;
+     }
+
+  {
+      root=prjConjunction;
+      System.out.println("root.svalue="+root.svalue);
+
+    return 0;
+  }
+)
+|
+(
+  
+  (
+    subclauses=subclauses()//| subclauses= subclausesPrj()
+  )
+  (
+         ( "," conjunctionsvalue=conjunction() {System.out.println("句子是否有连词conjunctionsvalue="+conjunctionsvalue); })
+		   (
+		     subclause1=subclauses()//|subclause1= subclausesPrj()
+		   ) 
+			   {
+			     if(!conjunctionsvalue.equals(""))  //存在 conjunction 另一subclauses  构建conjunction 并让subclauses 节点指向该节点
+			     {
+			       System.out.println("conjunctionsvalue 不空="+conjunctionsvalue);
+			       TreeNode conjunction=new TreeNode();
+			       conjunction.type=1;
+			       conjunction.svalue=conjunctionsvalue;
+			       conjunction.left=subclauses;
+			       conjunction.right=subclause1;
+			       subclauses=conjunction;
+			     }else {
+			       System.out.println("conjunctionsvalue 空="+conjunctionsvalue);  
+			       TreeNode conjunction=new TreeNode();
+			       conjunction.type=1;
+			       conjunction.svalue="";
+			       conjunction.left=subclauses;
+			       conjunction.right=subclause1;
+			       subclauses=conjunction;
+			    }
+			  }
+  )*
+
+  (".")
+  {
+      root=subclauses;
+      System.out.println("root.svalue="+root.svalue);
+
+    return 0;
+  }
+  | ";"
+  {
+    return 1;
+  }
+)
+}
+
+/**
+*******************************************************************************************
+*完整的句子中依据标点符号分成的几个简单句。
+*
+*
+*/
+  /**
+**************************************************************************
+小句子根据逗号继续分
+*/
+
+
+
+
+TreeNode subclauses() :
+{
+   
+   TreeNode subclause=new TreeNode();
+   TreeNode clauses=new TreeNode();
+   subclause.type=1;
+}
+{
+  	( subclause=subclause() (",")?{  System.out.println("subclause=-----------");})*//  (subclause2=subclause(){  System.out.println("subclause2=-----------");})*
+  	( clauses=clauses()//|clauses=subclausesPrj()
+  	  {  System.out.println("clauses=-----------");} )?
+  	{
+  	  System.out.println("subclauses STOP-----------");
+  	  if(subclause.svalue!=null)
+  	  {
+  	     subclause.right=clauses;
+  	  	 return subclause;
+  	   }else
+  	   {
+  	     return clauses;
+  	   }
+  	}
+}
+
+
+
+/**
+*******************************************************************************************
+*以下是监控语句的实现内容
+*
+*
+*/
+
+
+
+
+TreeNode subclausesPrj() :
+{
+   
+   TreeNode prjConjunction=new TreeNode();
+   TreeNode subclauseS=new TreeNode();
+   TreeNode subclauseE=new TreeNode();
+}
+{
+  		subclauseS=subclausesS()  subclauseE=subclausesE() 
+     	{
+     	 prjConjunction.type=1;
+     	 prjConjunction.svalue="prj";
+     	 prjConjunction.left=subclauseS;
+     	 prjConjunction.right=subclauseE;
+     	 return prjConjunction;
+     	 }
+}
+
+TreeNode subclausesE() :
+{
+   
+   TreeNode subclause=new TreeNode();
+   TreeNode clauses=new TreeNode();
+   subclause.type=1;  //END
+}
+{
+  	(subclause=subclauseE() (",")?{  System.out.println("subclauseE=-----------");})//  (subclause2=subclause(){  System.out.println("subclause2=-----------");})*
+  	(clauses=clausesPrj() (",")? {  System.out.println("clausesE=-----------");})? ";"
+  	{  System.out.println("subclausesE STOP-----------");}
+  	{
+  	  if(subclause.svalue!=null)
+  	  {
+  	     subclause.right=clauses;
+  	  	return subclause;
+  	   }
+  	   else
+  	   {
+  	     return clauses;
+  	   }
+  	}
+}
+
+TreeNode subclausesS() :
+{
+   
+   TreeNode subclause=new TreeNode();
+   TreeNode clauses=new TreeNode();
+   subclause.type=1;  //END
+}
+{
+  	(subclause=subclauseS() (",")?{  System.out.println("subclauseS=-----------");})//  (subclause2=subclause(){  System.out.println("subclause2=-----------");})*
+  	(clauses=clausesPrj() (",")? {  System.out.println("clausesS=-----------");})?
+  	{
+  	  if(subclause.svalue!=null)
+  	  {
+  	     subclause.right=clauses;
+  	  	return subclause;
+  	   }
+  	   else
+  	   {
+  	     return clauses;
+  	   }
+  	}
+}
+
+TreeNode subclauseE() :
+{
+   TreeNode subordinator=new TreeNode();
+   subordinator.type=1;
+}
+{
+//   (markprj())?  //prj标记
+  subordinator.svalue=markprjE()
+  subordinator.left=clause() 
+  {
+    System.out.println("subordinatorE.svalue="+subordinator.svalue);
+
+    return subordinator;
+  }
+}
+
+TreeNode subclauseS() :
+{
+   TreeNode subordinator=new TreeNode();
+   subordinator.type=1;
+}
+{
+//   (markprj())?  //prj标记
+  subordinator.svalue=markprjS()
+  subordinator.left=clause()
+  {
+    System.out.println("subordinatorS.svalue="+subordinator.svalue);
+
+    return subordinator;
+  }
+}
+/**
+*******************************************************************************************
+*/
+
+
+
+/**
+*******************************************************************************************
+*被完整句子分出来的简单句
+*
+*
+*/
+
+
+
+TreeNode subclause() :
+{
+   TreeNode subordinator=new TreeNode();
+   subordinator.type=1;
+}
+{
+//   (markprj())?  //prj标记
+  subordinator.svalue=subordinator()
+  subordinator.left=clauses()
+  {
+    System.out.println("subordinator.svalue="+subordinator.svalue);
+
+    return subordinator;
+  }
+}
+
+/**
+*******************************************************************************************
+*12-16补充if and  and  and识别，开始不支持if 并列多个句子 ，主句  的情况
+*句子的并列成分识别
+*
+*/
+
+
+
+
+TreeNode clauses() :  //句子
+{
+   TreeNode conjunction=new TreeNode();
+   conjunction.type=1;
+   TreeNode clause=new TreeNode();
+  Token node;
+}
+{
+
+{
+     System.out.println("clauses树节点的value识别 START"); }
+ (
+   clause=clause() //|  clause=subclausesPrj()
+   {
+     System.out.println("clauses  subclausesPrj STOP"); }
+ ) 
+
+     ( conjunction.svalue=conjunction()
+
+  (conjunction.right=clause()
+  	//|  conjunction.right=subclausesPrj()
+  )
+   )?
+  
+  ( conjunction.svalue=conjunction()
+  (conjunction.right=clauses())
+   )?
+
+
+      
+   {
+     System.out.println("clauses STOP");
+     if(conjunction.svalue!=null)
+     {
+       conjunction.left=clause;
+       System.out.println("conjunction.svalue="+conjunction.svalue);
+       return conjunction;
+     }
+     else
+     {
+         return clause;  //如果有并列成分 返回并列成分 没有 返回最前子句
+     }
+  }
+}
+
+
+/**
+*******************************************************************************************
+*监控
+*
+*/
+
+
+
+TreeNode clausesPrj() :  //句子
+{
+   TreeNode conjunction=new TreeNode();
+   conjunction.type=1;
+   TreeNode clause=new TreeNode();
+  Token node;
+}
+{
+ (
+   clause=clause() 
+ ) 
+  
+  (conjunction.svalue=conjunction()
+  conjunction.right=clause()
+   )?
+   {
+     System.out.println("clausesPrj stop");
+     if(conjunction.svalue!=null)
+     {
+       conjunction.left=clause;
+       System.out.println("conjunction.svalue="+conjunction.svalue);
+       return conjunction;
+     }
+     else
+     {
+         return clause;  //如果有并列成分 返回并列成分 没有 返回最前子句
+     }
+  }
+}
+
+
+/**
+*******************************************************************************************
+*递归遍历识别完整简单句子的开始
+*加入to do不定式
+*
+*/
+
+/**
+*******************************************************************************************
+*小完整句子成分分解
+*
+*/
+
+
+
+TreeNode clause() :
+{
+  Token node;
+  String name_string;
+  String scope_string = "";
+  TreeNode clause=new TreeNode();//根节点
+  TreeNode clauseSubject=new TreeNode();//主语的定语从句
+  TreeNode clauseObject=new TreeNode();//宾语的定语从句
+  TreeNode mainClause=new TreeNode();//主句节点
+  TreeNode subordinateClause=new TreeNode();//从句节点
+  clause.type=0;
+  clauseSubject.type=-1;
+  clauseObject.type=-1;
+  mainClause.type=-1;
+  mainClause.svalue="mainClause";
+  subordinateClause.type=-1;
+  subordinateClause.svalue="subordinateClause";
+  String mainClause_sub_String = "";
+  sub_String = "";
+  String temporalmark;
+  temporalmark="";
+  boolean predicatesmark=false;
+}
+
+{
+   (subject() (clauseSubject=subclause() {System.out.println("主语有定语从句的情况");})?)//定语从句
+   (     (predicatesmark=predicates())
+   	 (scope_string = to_prep())?
+   	 (object())?
+     (action_scope())?
+     {mainClause_sub_String=sub_String;
+     {
+	    /**
+				同步principal_class和active_trigger_class*******************************************************
+		*/
+	        int balance_size[] = new int[4];
+	        balance_size[0] = principal_class.size();
+	        balance_size[1] = active_trigger_class.size();
+		    balance_size[2] = attribute_class.size();
+		    balance_size[3] = action_scope_class.size();
+		    if(attribute_class.size()>0 & scope_string!="")
+		    {
+		    System.out.println("现在属性为"+attribute_class.get(attribute_class.size()-1));
+            attribute_class.set(attribute_class.size()-1, scope_string + attribute_class.get(attribute_class.size()-1));
+            System.out.println("改变以后属性为"+attribute_class.get(attribute_class.size()-1));
+            }
+            if(attribute_class.size()==0 & scope_string!="")
+            {
+             attribute_class.add(scope_string);
+            }    
+            int balance_size_max = 0;
+			for(int i=0; i<4; i++)
+			{
+			  if(balance_size[i] > balance_size_max)
+			  {
+              balance_size_max = balance_size[i];
+			  }
+			}
+			if(balance_size_max > balance_size[0])
+			{
+	         principal_class.add("no_principal");
+			}
+			if(balance_size_max > balance_size[1])
+			{
+	         active_trigger_class.add("no_active_trigger");
+			}
+			if(balance_size_max > balance_size[2])
+			{
+	         attribute_class.add("no_attribute");
+			}
+			if(balance_size_max > balance_size[3])
+			{
+	         action_scope_class.add("no_action_scope");
+			}
+     }
+     }
+
+     
+     (clauseObject=subclause())*  //定语从句
+   )   
+   
+   (temporalmark=temporal()
+   	{
+         System.out.println("temporalmark="+temporalmark);
+         System.out.println("clause.mark="+clause.mark);
+     try {
+       if(!temporalmark.equals("")&&!temporalmark.contains(" "))
+       {
+          System.out.println("WordSynsets="+ WordSynsets(temporalmark));
+          clause.mark=WordSynsets(temporalmark);
+          System.out.println("WordSynsets clause.mark="+ clause.mark);
+       }else if(clause.mark==-1)
+       {
+            clause.mark=prepWords(temporalmark);
+             System.out.println("prepWords mark="+ prepWords(temporalmark));
+       }
+       else
+       {
+         clause.mark=-1;
+       }
+     }
+     catch(IOException e)
+     {
+       
+       e.printStackTrace();
+       }
+     }
+   )?   //主谓形式 或者 主谓宾形式  +时序短语
+  {
+     clause.ivalue=nodecount++;
+	 clause.svalue=mainClause_sub_String;
+
+	 if(mainClause_sub_String.equals("")||mainClause_sub_String==null) {
+	   clause.svalue=sub_String;
+	   }
+     System.out.println(sub_String);//输出子句
+     System.out.println("mainClause_sub_String="+mainClause_sub_String);
+     System.out.println("clause.svalue="+clause.svalue);
+     if(clause.mark==-1) //当句子没有副词 和介词短语 表达时序语义时 用时态表示
+     {
+       if(predicatesmark)  clause.mark=2; //句子是将来时态 标记
+       }
+     if(clauseSubject.svalue!=null||clauseObject.svalue!=null) {
+       	  clauseSubject.svalue="clauseSubject";
+       	  clauseObject.svalue="clauseObject";
+          subordinateClause.left=clauseObject;
+          subordinateClause.right=clauseSubject;
+          mainClause.left=clause;
+          mainClause.right=subordinateClause;
+          return mainClause;
+       }
+     return clause;  //返回节点
+  }
+}
+
+
+
+
+String markprjS():
+{
+  Token node;
+}
+{
+ ( node =< VB >< START >< NN >< MONITORING >< IN >< WITH >){ System.out.println("< markprj >  <START>"+node.image );  return_String=appendString(return_String,"< markprj >",node.image); sub_String= appendString(sub_String,"< markprj >",node.image); return node.image;}
+}
+
+String markprjE():
+{
+  Token node;
+}
+{
+( node =< NN >< END >< NN >< MONITORING >< IN >< WITH >) { System.out.println("< markprj >  <END>"+node.image);  return_String=appendString(return_String,"< markprj >",node.image); sub_String= appendString(sub_String,"< markprj >",node.image);return node.image;}
+}
+
+/**
+*******************************************************************************************
+*subordinator()用来识别主语从句的连接词
+*
+*
+*连接词分为两种 WRB WDT
+*
+
+*添加 IF引导的从句
+*/
+String subordinator()://主从连词
+{
+  Token node;
+}
+{
+  (< WRB > 
+  node =< IDENTIFIER >  { System.out.println("< subordinator >  <WRB>"+node.image);  return_String=appendString(return_String,"< subordinator >",node.image); sub_String= appendString(sub_String,"< subordinator >",node.image); return node.image; }
+  )
+| 
+  (< WDT > 
+  node =< IDENTIFIER >  { System.out.println("< subordinator >  <WDT>"+node.image);  return_String=appendString(return_String,"< subordinator >",node.image); sub_String= appendString(sub_String,"< subordinator >",node.image); return node.image; }
+  )
+|   (< IN > 
+  node =< IDENTIFIER >  { System.out.println("< subordinator >  <IN>"+node.image);  return_String=appendString(return_String,"< subordinator >",node.image); sub_String= appendString(sub_String,"< subordinator >",node.image); return node.image; }
+  )
+}
+
+
+/**
+*******************************************************************************************
+*to do 不定式
+*
+*
+*
+*/
+String to_prep()://主从连词
+{
+  Token node;
+  String action_scope_class_string = "";
+}
+{
+ { System.out.println("to_prep()遍历开始------------------------"); }
+  
+  (< TOPRE >) 
+  node =< IDENTIFIER >
+  { System.out.println("< to_prep >  < TO >"+node.image);
+  return_String=appendString(return_String,"< subordinator >",node.image);
+  sub_String= appendString(sub_String,"< subordinator >",node.image);
+  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+    }
+
+
+///able to do
+ (   (< RB >)?
+  node =< IDENTIFIER >
+  { System.out.println("< to_prep >  < RB >"+node.image);
+  return_String=appendString(return_String,"< subordinator >",node.image);
+  sub_String= appendString(sub_String,"< subordinator >",node.image);
+  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+  }
+)?
+(  
+  (< VB >)?
+  node =< IDENTIFIER >
+  { System.out.println("< to_prep >  < VB >"+node.image);
+  return_String=appendString(return_String,"< subordinator >",node.image);
+  sub_String= appendString(sub_String,"< subordinator >",node.image);
+  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);}
+)?
+
+(  
+    (< NN >)? 
+   node =< IDENTIFIER >  { System.out.println("< to_prep >  < NN >"+node.image);
+   return_String=appendString(return_String,"< subordinator >",node.image);
+   sub_String= appendString(sub_String,"< subordinator >",node.image);
+   action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);}
+)?
+
+
+{
+  System.out.println("to_prep()遍历结束------------------------");
+  return action_scope_class_string;
+}
+}
+
+
+/**
+*******************************************************************************************
+*/
+
+
+
+
+
+String conjunction()://连接词
+{
+  Token node;
+}
+{
+  (
+    < CC >
+  node =< IDENTIFIER > {System.out.println("连接词的conjunction()方法< conjunction > CC"+node.image);
+  return_String=appendString(return_String,"< conjunction >",node.image);
+  sub_String=appendString(sub_String,"< conjunction >",node.image);
+  return node.image;}
+  )|
+  (
+    < RB > //then
+  node =< IDENTIFIER > {System.out.println("连接词的conjunction()方法< conjunction > RB"+node.image);
+  return_String=appendString(return_String,"< conjunction > < RB >",node.image);
+  sub_String=appendString(sub_String,"< conjunction >",node.image);
+  return node.image;}
+  )
+  |
+  (
+    < IN > //after
+  node =<  IDENTIFIER > 
+  {if(node.image.equals("after")|node.image.equals("before")|node.image.equals("until"))
+  { 
+    System.out.println("连接词的conjunction()方法< conjunction > "+node.image);
+    return_String=appendString(return_String,"< conjunction > after",node.image);
+    sub_String=appendString(sub_String,"< conjunction >",node.image);
+    return node.image;}
+	}
+  )
+  
+ }
+
+
+/**
+加入 < RP >
+*/
+
+void modifier():  //修饰副词  修饰语
+{
+   Token node;
+}
+{
+  (< RB >|< RP >)
+  node =<  IDENTIFIER > { System.out.println("副词的modifier()方法< modifier >< RB > "+node.image);
+  return_String= appendString(return_String,"< modifier >",node.image);
+  sub_String=appendString(sub_String,"< modifier >",node.image);}
+}
+
+/**
+*******************************************************************************************
+*时序语义的识别,更改形容词  < JJ > 变更为 < JJ >|< JJS >
+* 识别顺序为：
+*(1)< RB>|< RB >< CC >
+*(2)< IN > (< DT >)?((< JJ >|< JJS >))?(< NN >|< NNS >)*
+*(3)< PDT >< DT >< NN > (2)< IN > (< DT >)?((< JJ >|< JJS >|< CD >))?(< NN >|< NNS >)*
+*加入< CD > < VBG > 加入< RB >副词修饰形容词
+加入< HYPH >-< VBN >
+加入名次并列和形容西并列情况
+*/
+
+
+String temporal()://时序短语   介词短语
+{
+  Token node;
+  String temporal="";
+}
+{
+
+{
+     System.out.println("开始识别时序短语---------------------------------");  
+}
+  
+(
+    (<  RB  >)  //识别副词
+ 	node =< IDENTIFIER > { System.out.println("时序识别为副词temporal()：< temporal > RB "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);  //原子命题中  不加副词以及  介词短语作为的时序短语
+ (
+    <  CC  > node =< IDENTIFIER > { System.out.println("时序识别为副词加CC副词+RB副词temporal()：< temporal > RB CC "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    ( <  RB  >) //识别副词 CC 副词
+ 	node =< IDENTIFIER > { System.out.println("时序短语temporal()方法< temporal > RB "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+	)?
+	{
+  		System.out.println("temporal = "+temporal);
+  		return temporal;
+	}
+)
+|
+(
+   (< IN > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > IN "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+		  
+    ( (< DT >) node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > DT "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    )?
+        ( < RB > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > DT "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    )?
+    ( (< JJ >|< JJS >|< CD >|< VBG >|< VBN >) node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > JJ "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    )?
+    (
+          ( (< JJ >|< JJS >|< CD >|< VBG >) node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > JJ "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    )*
+	      ( (< HYPH >) node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > JJ "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+  		 (< VBN >) node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > JJ "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+  		)?  
+      (< NN >|< NNS >|< NNP >|< PRP >)
+    node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > NN NNS "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+ 		( < CC > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > DT "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    )?
+    )*
+    ( verb() )?
+    
+    )   
+  
+|
+(
+    < PDT > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > PDT "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    < DT > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > DT "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+    < NN > node =< IDENTIFIER > {System.out.println("时序短语temporal()方法< temporal > NN "+node.image);return_String= appendString(return_String,"< temporal >",node.image);  temporal+=" "+node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);
+  )
+|
+(
+  
+  (<  RP  >)  //识别副词
+ 	node =< IDENTIFIER > { System.out.println("时序短语temporal()方法：< temporal > RP "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);  //原子命题中  不加副词以及  介词短语作为的时序短语
+ 
+)
+|
+(
+  to_prep()
+  (<  RP  >)  //识别副词
+  node =< IDENTIFIER > { System.out.println("时序短语temporal()方法：< temporal > RP "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);  //原子命题中  不加副词以及  介词短语作为的时序短语
+  (<  RB  >)  //识别副词
+ 	node =< IDENTIFIER > { System.out.println("时序短语temporal()方法：< temporal > RP "+node.image); return_String= appendString(return_String,"< temporal >",node.image); temporal=node.image;}//sub_String=appendString(sub_String,"< temporal >",node.image);  //原子命题中  不加副词以及  介词短语作为的时序短语
+ 
+)
+)
+
+{
+  System.out.println("temporal = "+temporal);
+  return temporal;
+}
+
+}
+
+/**
+*******************************************************************************************
+*/
+
+
+
+
+
+/**
+*******************************************************************************************
+*substantive() 分析的是 SBAR下去掉连接词的句子的主语
+*
+*这里添加字符串处太冗余，需要修改
+*
+*识别顺序为  (<PRP>)?  |  (< CD >|< DT >)？  +   (< VBD >|< VBG >|< VBN >|< VBP >)|(< JJ >|< JJS >)  ？  +   (< NN >|< NNS >)*
+*
+*Chunyi Li  添加  (<PRP>)?  （人称代词）作为主语的情况
+* 单独添加形容词，过去分词/正在进行时作形容词时候不会被识别为VBD，而是被识别为JJ，并更改形容词识别程序。
+* 
+* 补充 the .. of .. 情况，此处需要增加对宾补和of的判断.，
+*
+
+*添加< RB >
+补充< CC >
+*/
+
+
+void subject():  
+{
+   Token node;
+   String principal_class_string = "";
+}
+{
+   (
+       (< PRP >)
+	   node =< IDENTIFIER >
+	   {System.out.println("主语的subject()，有人称代词为："+node.image+",或者没有也行");
+	   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+	   sub_String= appendString(sub_String,"< SUBSTANTIVE >",
+	   node.image);}
+   )
+ |
+   (
+	    (
+	     (< CD >|< DT >)
+		   node =< IDENTIFIER >
+		   {System.out.println("主语的subject()，从数词或者冠词开始，如果有为："+node.image+",或者没有也行");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);}
+		)?
+
+		(
+		  {System.out.println("进入这形容词里面"); }
+		  (adjective())
+		(
+		    (< CC >)
+		node =< IDENTIFIER >
+		 {System.out.println("进入这形容词并列里面"); }
+		{System.out.println("主语的subject()，有分词作形容词，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);}
+		 adjective()
+		 (adjective())?
+		)?				
+        )*
+		(
+		  (< VBG >)
+		node =< IDENTIFIER >
+		{System.out.println("主语的subject()，有分词作形容词，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);}
+		)?
+		(
+		  (< HYPH >)
+		node =< IDENTIFIER >
+		{System.out.println("主语的subject()，有分词作形容词，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);}
+		)?
+		(< NN >|< NNS >|< VBN >|< RB >|< NNP >)
+		 node =< IDENTIFIER > { System.out.println("主语的subject()，主语不是代词时必须至少有一个名词"+"< substantive > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		 sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+		 principal_class_string = appendString(principal_class_string,"< SUBSTANTIVE >",node.image);
+		 }
+		(preposition())?
+		(
+		  (< CC >)?
+		node =< IDENTIFIER >
+		{System.out.println("主语的subject()，有连词，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        principal_class_string = appendString(principal_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+
+   )+
+   {
+	principal_class.add(principal_class_string);
+   }
+ }
+
+
+/**
+*******************************************************************************************
+*/
+
+
+
+
+
+
+
+/**
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+*******************************************************************************************************************************
+*这里是宾语的提取
+*
+
+*/
+
+
+void object():  
+{
+   Token node;
+   String attribute_class_string = "";
+   String tmp = "";
+}
+{
+  { 
+     System.out.println("1onject()遍历开始---------------------------------");
+   }
+      (
+       (< PRP >)
+	   node =< IDENTIFIER >
+	   {System.out.println("2object()宾语的subject()，有人称代词为："+node.image+",");
+	   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+	   sub_String= appendString(sub_String,"< SUBSTANTIVE >",
+	   node.image);
+       attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);     
+	   }
+   )
+  | 
+   (
+        (
+        (< RB >)
+         node =< IDENTIFIER >
+		 { System.out.println("3作用对象不是代词时专有名词"+"< VBG > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< VBG >",node.image);
+		 sub_String= appendString(sub_String,"< VBG >",node.image);
+         attribute_class_string = appendString(attribute_class_string,"< HYPH >",node.image);            
+		 }
+       )?
+      
+     
+       (
+		(< VBG >|< VBD >)
+		node =< IDENTIFIER >
+		{System.out.println("4object()宾语有过去分词做形容词，如果有为："+node.image+"。");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+       (
+	     (< CD >|< DT >)
+		   node =< IDENTIFIER >
+		   {System.out.println("5object()宾语，从数词或者冠词开始，如果有为："+node.image+",");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+           attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+		   }
+		)?
+
+		
+		
+		(
+		  {System.out.println("6object()宾语如果有形容词里面"); }
+		  (tmp=adjective_object())
+          {
+           attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);
+          }
+        )?
+
+        
+		(
+		(< VBG >)
+		node =< IDENTIFIER >
+		{System.out.println("7object()宾语有过去分词做形容词，如果有为："+node.image+"。");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+
+	     (
+		 (< HYPH >)
+		node =< IDENTIFIER >
+		{System.out.println("8object()宾语的特殊名词，如果有为："+node.image+",");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+
+		
+        (tmp=adjective_object())?
+		{
+		  attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);  
+		}
+
+       // 形容词并列 加定冠词
+
+//       (
+//		    (< CC >)
+//		node =< IDENTIFIER >
+//		{System.out.println("9object()宾语如果有形容词有并列有为："+node.image+",");
+//		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+//        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+//		}
+//
+//        (
+//	     (< CD >|< DT >|< JJR >|< JJ >)
+//		   node =< IDENTIFIER >
+//		   {System.out.println("10object()宾语，从数词或者冠词开始，如果有为："+node.image+",");
+//		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+//           attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+//		   }
+//		)
+//        )?
+		
+//		(
+//		    (< CC >)
+//		node =< IDENTIFIER >
+//		{System.out.println("11object()宾语如果有形容词有并列有为："+node.image+",");
+//		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+//        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+//		}
+//        (
+//		  {System.out.println("12object()宾语如果有形容词里面"); }
+//		  (tmp=adjective_object())
+//          {
+//           attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);
+//          }
+//        )?
+//		
+//		(tmp=adjective_object())
+//		{
+//		  attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);  
+//		}
+//		)?
+		
+		(tmp=adjective_object())?
+		{
+		  attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);  
+		}
+	  
+	   (< NN >|< NNS >|< VBN >|< RB >|< NNP >) 
+		node =< IDENTIFIER >
+		{ System.out.println("13object()宾语的不是代词时必须至少有一个名词"+" < NN > NOUN "+node.image);
+		  return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		  sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+		  attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);            
+		}
+		
+	/**
+    ***************************************前面都是形容词各种并列，下面是名词各种并列 Nn 和 of 加名词并列*******************
+	*/
+         
+         
+		   	// 加入of情况	 	  
+			  {
+			    System.out.println("object()宾语存在of情况");
+
+			   }
+		   		(
+				  (< CC >)
+				node =< IDENTIFIER >
+				{System.out.println("宾语的如果有名词并列，如果有为："+node.image+",或者没有也行");
+				return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+				sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+		        attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+				}
+		       )?	
+
+         )+
+//          (
+//            
+//			    (tmp=preposition_object())
+//			    {
+//					attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);  
+//		        }
+//                    (
+//				     (< CD >|< DT >)
+//					   node =< IDENTIFIER >
+//					   {System.out.println("object()宾语，从数词或者冠词开始，如果有为："+node.image+",");
+//					   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//					   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+//			           attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+//					   }
+//					)?
+//
+//		          (tmp=adjective_object())?
+//					{
+//					  attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",tmp);  
+//					}
+//		        
+//                 (< NN >|< NNS >|< VBN >|< RB >|< NNP >) 
+//		          node =< IDENTIFIER >
+//		        { System.out.println("object()宾语的不是代词时必须至少有一个名词"+" < NN > NOUN "+node.image);
+//		          return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//		          sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+//		          attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);            
+//		        }
+//					
+//	       )?
+    
+   {  
+   attribute_class.add(attribute_class_string);     
+   System.out.println("object()遍历完毕");  
+   }
+}
+
+
+
+/**
+*******************************************************************************************
+* 宾语中的形容词
+*/
+
+String adjective_object(): //形容词
+{
+  Token node;
+  String attribute_class_string = "";
+}
+{
+  
+  (< JJ >|< JJS >|< JJR >)
+  node =< IDENTIFIER > { System.out.println("宾语中的< ADJECTIVE >  "+node.image);
+  return_String = appendString(return_String,"< ADJECTIVE >",node.image);
+  sub_String = appendString(sub_String,"< ADJECTIVE >",node.image);
+  return attribute_class_string;
+  }
+}
+
+
+/**
+*******************************************************************************************
+* 宾语中的介词
+*/
+
+String preposition_object(): //介词
+{
+  Token node;
+  String attribute_class_string = "";
+}
+{
+   {
+    
+     System.out.println("preposition_object()遍历开始---------------------------------");
+  
+   }
+  
+  < IN >
+ node= < IDENTIFIER >
+ {
+   if(node.image.equals("of"))
+   { 
+	 System.out.println("宾语中的介词的preposition()方法 < IN > preposition   "+node.image);
+	 return_String = appendString(return_String,"< IN > preposition",node.image);
+	 sub_String = appendString(sub_String,"< IN > preposition",node.image);
+	 attribute_class_string = appendString(attribute_class_string,"< SUBSTANTIVE >",node.image);
+	 return attribute_class_string;
+	}else
+	{
+	  return "";
+	}
+
+ }
+}
+ 
+
+
+/**
+*******************************************************************************************************************************
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+*/
+/**
+*******************************************************************************************************************************
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+作用对象方法
+
+*/
+void action_scope():  
+{
+   Token node;
+   String action_scope_class_string = "";
+   String tmp = "";
+}
+{
+   {
+    System.out.println("action_scope()遍历开始-------------------------------------------------");
+  
+   }
+   
+    (
+            (       (< IN >| < TOPRE > < IDENTIFIER > (< VB >| <DT> < IDENTIFIER > < NN >| < NN >) (< IDENTIFIER > (< CC > < IDENTIFIER > < VB >| <DT> < IDENTIFIER > < NN >|< NN >))? )
+	 node= < IDENTIFIER > 
+	 {
+		 System.out.println("1作用对象中的介词 < IN > preposition   "+node.image);
+		 return_String = appendString(return_String,"< IN > preposition",node.image);
+		 sub_String = appendString(sub_String,"< IN > preposition",node.image);
+		 action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+	 })
+
+	 )
+	 
+ //+号开始
+   (
+     // not allowed
+
+       (
+        (< VBG >|< VBN >)
+         node =< IDENTIFIER >
+		 { System.out.println("2作用对象不是代词时专有名词"+"< VBG > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< VBG >",node.image);
+		 sub_String= appendString(sub_String,"< VBG >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< HYPH >",node.image);            
+		 }
+       )?
+
+          (
+      (< IN >| < TOPRE > < IDENTIFIER >  (< VB >|< NN >))
+	 node= < IDENTIFIER > 
+	 {
+		 System.out.println("3作用对象中的介词 < IN > preposition   "+node.image);
+		 return_String = appendString(return_String,"< IN > preposition",node.image);
+		 sub_String = appendString(sub_String,"< IN > preposition",node.image);
+		 action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+	 }     )?
+// to并列
+     (      (< CC >)
+		node =< IDENTIFIER >
+		{System.out.println("3-1-1作用对象如果有名词并列，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		}
+       
+      (< VB >| < VBG >|< IN >)
+	 node= < IDENTIFIER > 
+	 {
+		 System.out.println("3-1作用对象中的介词 < IN > preposition   "+node.image);
+		 return_String = appendString(return_String,"< IN > preposition",node.image);
+		 sub_String = appendString(sub_String,"< IN > preposition",node.image);
+		 action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+	 }
+     )?
+
+      (
+	     (< RBS >)
+		   node =< IDENTIFIER >
+		   {System.out.println("4作用对象从数词或者冠词开始，如果有为："+node.image+",");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+           action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		   }
+      )?
+     
+     (
+	     (< CD >|< DT >)
+		   node =< IDENTIFIER >
+		   {System.out.println("5作用对象从数词或者冠词开始，如果有为："+node.image+",");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+           action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		   }
+      )?
+      
+        (      		  (tmp = adjective_action_scope())
+		{
+		  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",tmp);  
+		}
+         )?
+
+        (
+      		  (tmp = adjective_action_scope())
+		{
+		  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",tmp);  
+		}
+        )?
+
+
+        (
+        (< VBG >)
+         node =< IDENTIFIER >
+		 { System.out.println("6作用对象不是代词时专有名词"+"< VBG > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< VBG >",node.image);
+		 sub_String= appendString(sub_String,"< VBG >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< HYPH >",node.image);            
+		 }
+       )?
+
+        (
+        (< VBG >)
+         node =< IDENTIFIER >
+		 { System.out.println("7作用对象不是代词时专有名词"+"< VBG > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< VBG >",node.image);
+		 sub_String= appendString(sub_String,"< VBG >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< HYPH >",node.image);            
+		 }
+       )?
+
+        (
+      		  (tmp = adjective_action_scope())
+		{
+		  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",tmp);  
+		}
+        )?
+
+       (
+        (< DT >)
+         node =< IDENTIFIER >
+		 { System.out.println("8作用对象不是代词时专有名词"+"< DT > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< DT >",node.image);
+		 sub_String= appendString(sub_String,"< DT >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< DT >",node.image);            
+		 }
+       )?
+
+        (
+		  (< CC >)
+		node =< IDENTIFIER >
+		{System.out.println("9作用对象如果有名词并列，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		}
+      	(tmp = adjective_action_scope())
+		{
+		  action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",tmp);  
+		}	
+		)?
+
+       
+
+         (< NN >|< NNS >|< VBN >|< RB >|< NNP >|< PRP >)
+         node =< IDENTIFIER >
+		 { System.out.println("10作用对象不是代词时必须至少有一个名词"+"< substantive > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		 sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);            
+		 }
+       (
+        (< HYPH >)
+         node =< IDENTIFIER >
+		 { System.out.println("11作用对象不是代词时专有名词"+"< HYPH > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< HYPH >",node.image);
+		 sub_String= appendString(sub_String,"< HYPH >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< HYPH >",node.image);            
+		 }       )?
+       (
+        (< PRP >)
+         node =< IDENTIFIER >
+		 { System.out.println("12作用对象不是代词时专有名词"+"< HYPH > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< HYPH >",node.image);
+		 sub_String= appendString(sub_String,"< HYPH >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< HYPH >",node.image);            
+		 }
+       )?
+      // 1*1
+       (
+        (< CD >)
+         node =< IDENTIFIER >
+		 { System.out.println("13作用对象不是代词时专有名词"+"< DT > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< DT >",node.image);
+		 sub_String= appendString(sub_String,"< DT >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< DT >",node.image);            
+		 }
+       )?
+       
+
+        (
+		  (< CC >)?
+		node =< IDENTIFIER >
+		{System.out.println("14作用对象如果有名词并列，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+
+	   (
+        (< CD >)
+         node =< IDENTIFIER >
+		 { System.out.println("15作用对象不是代词时专有名词"+"< CD > < CD > NOUN "+node.image);
+		 return_String=appendString(return_String,"< CD >",node.image);
+		 sub_String= appendString(sub_String,"< CD >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< CD >",node.image);            
+		 }
+       )?
+   )+
+   {
+    System.out.println("action_scope()遍历完毕-------------------------------------------------"); 
+	action_scope_class.add(action_scope_class_string);
+   }
+}
+
+
+/**
+*******************************************************************************************
+* 作用域中的形容词
+*/
+
+String adjective_action_scope(): //形容词
+{
+  Token node;
+  String action_scope_class = "";
+}
+{
+  
+  (< JJ >|< JJS >|< JJR >)
+  node =< IDENTIFIER > { System.out.println("作用域中宾语中的< ADJECTIVE >  "+node.image);
+  return_String = appendString(return_String,"< ADJECTIVE >",node.image);
+  sub_String = appendString(sub_String,"< ADJECTIVE >",node.image);
+  return action_scope_class;
+  }
+}
+
+
+
+
+/**
+*******************************************************************************************************************************
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+*/
+
+
+
+
+/**
+*******************************************************************************************
+*在treenode clause中的谓语识别
+*
+*识别顺序为   情态动词（有无都可）+谓语动词predicate()
+*如果有情态动词 will shall 时间标记为1   如果不是则return_String 加入情态动词   sub_String不加情态动词
+*
+*此处应该考虑 will  和  would的时态问题，需要扩展
+*加入 will not情况
+*/
+
+boolean predicates():
+{
+  boolean mark=false;
+}
+{
+    (mark=modality ())?
+
+	({ System.out.println("主次表结构遍历完");  }
+	
+//	  (
+//	    predicate_copula()?
+//	  )?
+//		|
+	  (
+	    (adverb())?(adverb())? (predicate())?{ System.out.println("主谓宾结构谓语遍历完");  return mark;}
+	  )
+	)
+	{return mark;}
+
+
+}
+
+boolean modality ():
+{
+  boolean mark=false;
+  Token node;
+}
+{     < MD >
+  node= < IDENTIFIER >
+  { System.out.println("modality()方法中识别的情态动词为< MODALITY MD >  "+node.image);
+  	return_String= appendString(return_String,"< MODALITY >",node.image);
+  	System.out.println("识别完情态动词，此时return_String的值为"+node.image);
+  	if(node.image.equals("will")||node.image.equals("shall")){
+  	}
+  	else{
+  		return false;
+  	}
+  	}
+		/**
+		*******************************************************************************************
+		***************************************为主系表所设立***************************************
+		*/
+   {
+     System.out.println("测试是否进入----------------------");
+   }                          
+  	predicate_copula()
+  	{ 
+    return true;
+    }
+						
+}
+  
+
+/**
+*******************************************************************************************
+
+***************************************为主系表所设立***************************************
+*
+*
+*/
+
+
+void predicate_copula():
+{
+  Token node;
+  String active_trigger_class_string ="";
+}
+{
+ 
+  (   (< VBD >|< VBG >|< VBN >|< VBP >|< VBZ >|< VB >)
+  node= < IDENTIFIER >
+  { System.out.println("主系表中动词做表语的动词情况 < PARTICIPLE > VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< VERB >",node.image);
+  }
+  
+  
+  (
+    (< VBN >|< JJ >)
+  node= < IDENTIFIER >
+  { System.out.println("主系表中动词/JJ做表语的be动词情况 < PARTICIPLE > VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< VERB >",node.image);
+  } 
+  )?
+  
+  ( < CC > node =< IDENTIFIER >
+  {System.out.println("时主系表中动词有多个表语的情况 "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< VERB >",node.image);
+  }
+  )?)*
+{
+active_trigger_class.add(active_trigger_class_string);
+}
+|
+ (   
+  (< JJ >|< JJS >|< JJR >)
+  node =< IDENTIFIER >
+  {
+  System.out.println("主系表中动词做表语的情况的< ADJECTIVE >  "+node.image);
+  return_String = appendString(return_String,"< ADJECTIVE >",node.image);
+  sub_String = appendString(sub_String,"< ADJECTIVE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< ADJECTIVE >",node.image);
+  }
+ )
+{
+    System.out.println("主系表中存在表语遍历完毕了");
+active_trigger_class.add(active_trigger_class_string);
+}
+}
+
+void prepositional_phrase_copula():
+{
+   Token node;
+   String action_scope_class_string = "";
+   String tmp = "";
+}
+{
+     < IN >
+	 node= < IDENTIFIER >
+	 {
+		 System.out.println("主系表中作用对象中的介词 < IN > preposition   "+node.image);
+		 return_String = appendString(return_String,"< IN > preposition",node.image);
+		 sub_String = appendString(sub_String,"< IN > preposition",node.image);
+		 action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+	 }
+
+   (
+
+     (
+	     (< CD >|< DT >)
+		   node =< IDENTIFIER >
+		   {System.out.println("主系表中作用对象从数词或者冠词开始，如果有为："+node.image+",");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+           action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		   }
+      )?
+
+           (
+	     (< JJ >)
+		   node =< IDENTIFIER >
+		   {System.out.println("主系表中作用对象从数词或者冠词开始，如果有为："+node.image+",");
+		   return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		   sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+           action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		   }
+      )?
+          
+
+         (< NN >|< NNS >|< VBN >|< RB >|< NNP >)
+         node =< IDENTIFIER >
+		 { System.out.println("主系表中的作用对象不是代词时必须至少有一个名词"+"< substantive > < NN > NOUN "+node.image);
+		 return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		 sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+         action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);            
+		 }
+       
+        (
+		  (< CC >)
+		node =< IDENTIFIER >
+		{System.out.println("主系表中作用对象如果有名词并列，如果有为："+node.image+",或者没有也行");
+		return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+		sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);
+        action_scope_class_string = appendString(action_scope_class_string,"< SUBSTANTIVE >",node.image);
+		}
+		)?
+   )*
+   {
+    System.out.println("主系表中存在作用域遍历完毕了");
+    if(action_scope_class_string!="")
+    { 
+	action_scope_class.add(action_scope_class_string);
+    }
+   }
+}
+
+/**
+*******************************************************************************************
+
+******************************************************************************
+*
+*
+*/
+
+
+
+/**
+*******************************************************************************************
+*在treenode clause中的不带情态动词谓语识别
+*
+*识别顺序为
+（1）(< VB >|< VBD >|< VBN >|< VBP >|< VBZ >)(< RP >)? +  数字0 | 数字1-9 （0|...|9）* （%）？| true
+（2）(< VBD >|< VBG >|< VBN >|< VBP >)
+*li ge工作将数词变为动词作谓语的一部分，此处用的?所以不需要一定删除
+*  node=< BE > { System.out.println("< BE >be  "+node.image);return_String= appendString(return_String,"< BE >",node.image); sub_String= appendString(sub_String,"< BE >",node.image);}
+*  此处有问题 is 为关键字，前面编辑也是<VBZ>，应该先遍历<VBZ>这样的标签再判断
+* 补充 过去分词中间有RB修饰的情况， 例如 is only enable的情况
+*
+*
+*/
+
+
+void predicate():
+{
+  Token node;
+}
+{ 
+ (be() (adverb())? (participle()| complement())?)
+| verb()(is_adjective())?(participle())?
+
+}
+
+
+/**
+*******************************************************************************************
+*去掉原有BE IS ARE的关键词声明,改用NLP标签的声明
+*添加 is 所对应的 < VBZ > 标签
+
+添加 be 所对应< VB > 标签 verb()adj()
+*
+*/
+
+
+void be(): 
+{
+  Token node;
+  String active_trigger_class_string ="";
+}
+ {
+  (< VBD >|< VBG >|< VBN >|< VBP >|< VBZ >)
+  node= < IDENTIFIER > { System.out.println("1be() 方法中的< PARTICIPLE > VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  }
+  (
+  (< RB >)
+  node= < IDENTIFIER >
+  { System.out.println("2be() 方法中的< PARTICIPLE > VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  } 
+  (< VB >|< JJ >|< VBN >)
+  node= < IDENTIFIER >
+  { System.out.println("3be() 方法中的< PARTICIPLE > VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  }   )?
+  
+  {  
+  if(node.image.equals("is")||node.image.equals("are")||node.image.equals("am")||node.image.equals("was")||node.image.equals("were")||node.image.equals("be"))
+  {
+  }else { 
+  active_trigger_class_string = appendString(active_trigger_class_string,"< VERB >",node.image);
+  active_trigger_class.add(active_trigger_class_string);
+  }
+}
+}
+
+void complement (): //补语 形容词 或副词
+{
+  Token node;
+}
+{
+ is_adjective()
+ | adverb()
+}
+
+/**
+*******************************************************************************************
+* LI ge此段程序错误，识别主语时候无法识别形容词，已更改。
+*加入< RB > < JJ >的情况
+*/
+
+
+void adjective(): //形容词
+{
+  Token node;
+}
+{
+
+  (< JJ >|< JJS >|< JJR >)
+  node =< IDENTIFIER > { System.out.println("adjective()中的< ADJECTIVE >  "+node.image);
+  return_String = appendString(return_String,"< ADJECTIVE >",node.image);
+  sub_String = appendString(sub_String,"< ADJECTIVE >",node.image);
+
+  }
+}
+
+
+
+
+
+
+void is_adjective(): //is adj
+{
+  Token node;
+  String active_trigger_class_string ="";
+}
+{
+
+  (< JJ >|< JJS >|< JJR >)
+  node =< IDENTIFIER > { System.out.println("is_adjective()中的< ADJECTIVE >  "+node.image);
+  return_String = appendString(return_String,"< ADJECTIVE >",node.image);
+  sub_String = appendString(sub_String,"< ADJECTIVE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< PARTICIPLE >",node.image);
+  active_trigger_class.add(active_trigger_class_string);
+  }
+}
+
+
+
+void adverb(): //副词
+{
+  Token node;
+}
+{
+  (< RB >|< RP >)
+ node= < IDENTIFIER > { System.out.println("< RB > ADVERB RB   "+node.image); return_String = appendString(return_String,"< ADVERB >",node.image); sub_String = appendString(sub_String,"< ADVERB >",node.image);}
+}
+
+
+
+void preposition(): //介词
+{
+  Token node;
+}
+{
+  < IN >
+ node= < IDENTIFIER > { System.out.println("介词的preposition()方法 < IN > preposition   "+node.image); return_String = appendString(return_String,"< IN > preposition",node.image); sub_String = appendString(sub_String,"< IN > preposition",node.image);}
+}
+
+
+
+
+void participle(): //分词
+{
+   Token node;
+   String active_trigger_class_string ="";
+}
+{
+ (< VBD >|< VBG >|< VBN >|< VBP >)
+  node= < IDENTIFIER > { System.out.println("分词的participle()方法中 VERB   "+node.image);
+  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+  active_trigger_class_string = appendString(active_trigger_class_string,"< PARTICIPLE >",node.image);
+  active_trigger_class.add(active_trigger_class_string);
+  }
+//|
+// (
+//    (< VBD >|< VBG >|< VBN >|< VBP >)
+//  node= < IDENTIFIER > { System.out.println("分词的participle()方法中 VERB   "+node.image);
+//  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+//  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+//  active_trigger_class_string = appendString(active_trigger_class_string,"< PARTICIPLE >",node.image);
+//  active_trigger_class.add(active_trigger_class_string);
+//   })
+// (
+//     (
+//       (< CC >)
+//	node =< IDENTIFIER >
+//	{System.out.println("分词的participle()，有两个并别分词："+node.image+",或者没有也行");
+//	return_String=appendString(return_String,"< SUBSTANTIVE >",node.image);
+//	sub_String= appendString(sub_String,"< SUBSTANTIVE >",node.image);})
+//   (
+//     (< VBD >|< VBG >|< VBN >|< VBP >)
+//  node= < IDENTIFIER > { System.out.println("分词的participle()方法中 VERB   "+node.image);
+//  return_String = appendString(return_String,"< PARTICIPLE >",node.image);
+//  sub_String = appendString(sub_String,"< PARTICIPLE >",node.image);
+//  active_trigger_class_string = appendString(active_trigger_class_string,"< PARTICIPLE >",node.image);
+//  active_trigger_class.add(active_trigger_class_string);
+//   })
+//	)?	
+
+}
+
+void verb(): //动词
+{
+  Token node;
+  String active_trigger_class_string ="";
+}
+{
+  (< VB >|< VBD >|< VBN >|< VBP >|< VBZ >)(< RP >)?
+  node= < IDENTIFIER >
+  { System.out.println("动词verb() 方法中< VB > VERB   "+node.image);
+  return_String = appendString(return_String,"< VERB >",node.image);
+  sub_String = appendString(sub_String,"< VERB >",node.image);
+  }
+   
+  (
+  (< CC >)
+  node= < IDENTIFIER >
+  { System.out.println("动词verb() 方法中< VB > VERB   "+node.image);
+  return_String = appendString(return_String,"< VERB >",node.image);
+  sub_String = appendString(sub_String,"< VERB >",node.image);
+  }
+  
+  (< VB >)
+  node= < IDENTIFIER >
+  { System.out.println("动词verb() 方法中< VB > VERB   "+node.image);
+  return_String = appendString(return_String,"< VERB >",node.image);
+  sub_String = appendString(sub_String,"< VERB >",node.image);
+  }
+
+      )?
+
+
+  {
+  if(node.image.equals("is")||node.image.equals("are")||node.image.equals("am")||node.image.equals("was")||node.image.equals("were")||node.image.equals("be"))
+  {
+  }else { 
+  active_trigger_class_string = appendString(active_trigger_class_string,"< VERB >",node.image);
+  active_trigger_class.add(active_trigger_class_string);
+  }
+  }
+}
