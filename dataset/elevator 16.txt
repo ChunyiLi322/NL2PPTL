@@ -1,0 +1,17 @@
+Whenever the button to some floor is pushed, the elevator will reach there.
+If o1 or i1 is pushed, floor1 will be reached.
+If o2 or i2 is pushed, floor2 will be reached.
+If o3 or i3 is pushed, floor3 will be reached.
+If the elevator reaches a floor, the corresponding buttons are disabled.
+If o1 is pushed, o1 will not be popped, before floor1 is reached.
+If o2 is pushed, o2 will not be popped, before floor2 is reached.
+If o3 is pushed, o3 will not be popped, before floor3 is reached.
+If i1 is pushed, i1 will not be popped, before floor1 is reached.
+If i2 is pushed, i2 will not be popped, before floor2 is reached.
+If i3 is pushed, i3 will not be popped, before floor3 is reached.
+If the elevator is idle, the door will be opened.
+If i1 or i2 or i3 or o1 or o2 or o3 is pushed, the elevator is not idle.
+If person is not available, no i1 or i2 or i3 is pushed. 
+If the door is opened, the door will be closed in 2 seconds.
+
+

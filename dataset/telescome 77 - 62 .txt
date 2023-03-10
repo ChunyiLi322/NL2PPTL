@@ -1,0 +1,62 @@
+When introduction_screen is available, eventually selection_procedure is enabled.
+If anything is selected after selection_procedure terminates, next ordering_procedure is enabled.
+If anything is not selected after selection_procedure terminates, next introduction_screen is enabled.
+If something is ordered after ordering_procedure terminates, next order_processing_procedure is enabled.
+if something is not ordered after ordering_procedure terminates, next Introduction_screen is enabled.
+Specifical_offer or group_selection or back_button can be selected in selection_procedure.
+If back_button is selected, selection_procedure terminates.
+If Specifical_offer is selected, system_information is displayed after special_offer_procedure terminates.
+If Specifical_offer is selected, special_display_information is displayed.
+After special_display_information is displayed, article_selection or adjust_article_amount or special_back can be selected.
+If article_selection is selected, system_information is displayed.
+If adjust_article_amount is selected, system_information is displayed.
+If special_back is selected, special_offer_procedure terminates.
+If group_selection is selected, system_information is displayed after shopping_procedure terminates.
+If subgroup is selected, next standard_system_information is displayed.
+If adjust_amount is selected, next shopping_list is adjusted and standard_system_information is displayed.
+If search_function is selected and article is found, next standard_system_information is displayed.
+If search_function is selected and article is not found, next standard_system_information is displayed.
+If list_function is selected, standard_system_information is displayed after list_function terminates.
+If standard_back is selected, shopping_procedure terminates. 
+If user is registered, list_system_information is displayed.
+After list_system_information is displayed, saving_current_list or read_list or delete_list or list_function_back can be selected.
+If user is registered, list_function terminates.
+If saving_current_list is selected, list_system_information is displayed.
+If read_list is selected, list_system_information is displayed.
+If delete_list is selected, list_system_information is displayed.
+If list_function_back is selected, list_function terminates.
+After order_processing_procedure is terminated, introduction_screen is available.
+When article_information is displayed, process_selection or process_back can be selected.
+%%If process_selection is selected, article_selection_procedure starts.
+When article_selection_procedure terminates, article_information is displayed.
+If process_back is selected, article_process terminates.
+When article_selection_information is displayed, article_selection or adjust_article_amount or search_function or article_selection_back can be selected.
+If article_selection is selected, article_selection_information is displayed. 
+If adjust_article_amount is selected, article_selection_information is displayed. 
+If search_function is selected and article is found, article_selection_information is displayed. 
+If search_function is selected and article is not found, article_selection_information is displayed. 
+If article_selection_back is selected, article_selection_procedure terminates.
+When introduction_screen is displayed, eventually overview_of_subject is available.
+If subject_information_display terminates, overview_of_subject is available.
+If subject is not found, overview_of_subject is available.
+If information_back is selected, introduction_screen is displayed.
+If scroll_text is selected, text_data_information is displayed. 
+If  telephonic_info or ordering is selected,  text_data_information is displayed. 
+If apply_register is selected and form is filled and printout is wanted,  text_data_information is displayed. 
+If apply_register is selected and form is filled and printout is not wanted,  text_data_information is displayed. 
+If apply_register is selected and form is not filled,  text_data_information is displayed. 
+If selected_subject_back is selected, subject_information_display terminates.
+If print_current_page or print_all is selected, text_data_information is displayed. 
+if text_data_information is displayed, Scrolling_text or printing_current_page or printing_all or telephonic_info or ordering or applying_register or selected_subject_back can be selected.
+When introduction_screen is displayed, bulletins are deleted.
+When bulletin is deleted, if user modifies the bulletin, identification_procedure is started.
+Enable_bulletin_input is available, after user_select_bulletin_category is terminated. 
+After  enable_bulletin_input is terminated, system_information will be added automatically.
+After system_information is added, new_bulletin_procedure terminates.
+If removing_bulletin_procedure starts and bulletin_removing is confirmed, bulletin is deleted.
+After bulletin is deleted, removing_bulletin_procedure is terminated.
+If removing_bulletin_procedure starts and bulletin_removing is not confirmed, removing_bulletin_procedure terminates.
+When introduction_screen is displayed, registration_terms are displayed.
+When registration_terms are displayed, if registration_form is requested, next local_printing is executed. 
+When registration_terms are displayed, if registration_form is not requested, next introduction_screen is displayed.
+After registration_form is filled, introduction_screen is displayed.

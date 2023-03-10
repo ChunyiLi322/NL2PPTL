@@ -1,0 +1,60 @@
+The CARA will be operational whenever the LSTAT is powered on.
+If an occlusion is detected and auto_control_mode is running, auto_control will be terminated.
+If Air_Ok_signal remains low, auto_control_mode is terminated in 3 seconds.
+If arterial_line and pulse_wave are corroborated and cuff is available, next arterial_line is selected.
+If pulse_wave is corroborated and cuff is available and arterial_line is not corroborated, next pulse_wave is selected.
+If arterial_line is not corroborated and pulse_wave is not  corroborated and cuff is available, next cuff is selected.
+If a pump is plugged in and an infusate is ready and the occlusion_line is clear, auto_control_mode can be started.
+When auto_control_mode is entered, eventually the cuff will be inflated.
+If manual_mode is running and start_auto_control_button is pressed, next auto_control_mode is running.
+If start_auto_control_button is pressed and cuff is not available, an alarm is issued and override_selection is provided.
+If alarm_reset_button is pressed, the alarm is disabled.
+If override_selection is provided, if override_yes is pressed and arterial_line is not corroborated, next arterial_line is selected.
+If override_selection is provided, if override_yes is pressed and arterial_line is corroborated and pulse_wave is not corroborated, next pulse_wave is selected.
+If override_selection is provided, if override_no is pressed, next manual_mode is started.
+If manual_mode is running and start_auto_control_button is pressed, next corroboration is triggered.
+If  a valid blood_pressure is not available in 180 seconds, manual_mode should be triggered.
+If pulse_wave or arterial_line becomes available and cuff is selected, corroboration is triggered.
+If pulse_wave is selected and arterial_line becomes available, corroboration is triggered.
+When auto_control_mode is running, terminate_auto_control_button should be available.
+When auto_control_mode is running and the arterial_line or pulse_wave  or cuff is lost, an alarm should sound in 60 seconds.
+If pulse_wave and arterial_line are not available and cuff is selected and blood_pressure is not valid, next manual_mode is started.
+Whenever termiante_auto_control_button is selected, a confirmation_button is available.
+If a confirmation_button is available and confirmation_yes is pressed, manual_mode is started.
+If a confirmation_button is available and confirmation_no is pressed, auto_control_mode is still running.
+If a confirmation_button is available and confirmation_yes is pressed, next confirmation_yes is disabled.
+If a confirmation_button is available and confirmation_no is pressed, next confirmation_no is disabled.
+If termianting_auto_control_button is pressed, next termianting_auto_control_button is disabled.
+When a start_auto_control_button is enabled, start_auto_control_button is enabled, until it is pressed.
+if arterial_line or pulse_wave or cuff can be available, then blood_pressure is available.
+If cuff and arterial_line and pulse_wave are not available in 60 seconds, next manual_mode is started.
+The CARA will be operational whenever the LSTAT is powered on.
+If an occlusion is detected and auto_control_mode is running, auto_control will be terminated.
+If Air_Ok_signal remains low, auto_control_mode is terminated in 3 seconds.
+If arterial_line and pulse_wave are corroborated and cuff is available, next arterial_line is selected.
+If pulse_wave is corroborated and cuff is available and arterial_line is not corroborated, next pulse_wave is selected.
+If arterial_line is not corroborated and pulse_wave is not  corroborated and cuff is available, next cuff is selected.
+If a pump is plugged in and an infusate is ready and the occlusion_line is clear, auto_control_mode can be started.
+When auto_control_mode is entered, eventually the cuff will be inflated.
+If manual_mode is running and start_auto_control_button is pressed, next auto_control_mode is running.
+If start_auto_control_button is pressed and cuff is not available, an alarm is issued and override_selection is provided.
+If alarm_reset_button is pressed, the alarm is disabled.
+If override_selection is provided, if override_yes is pressed and arterial_line is not corroborated, next arterial_line is selected.
+If override_selection is provided, if override_yes is pressed and arterial_line is corroborated and pulse_wave is not corroborated, next pulse_wave is selected.
+If override_selection is provided, if override_no is pressed, next manual_mode is started.
+If manual_mode is running and start_auto_control_button is pressed, next corroboration is triggered.
+If  a valid blood_pressure is not available in 180 seconds, manual_mode should be triggered.
+If pulse_wave or arterial_line becomes available and cuff is selected, corroboration is triggered.
+If pulse_wave is selected and arterial_line becomes available, corroboration is triggered.
+When auto_control_mode is running, terminate_auto_control_button should be available.
+When auto_control_mode is running and the arterial_line or pulse_wave  or cuff is lost, an alarm should sound in 60 seconds.
+If pulse_wave and arterial_line are not available and cuff is selected and blood_pressure is not valid, next manual_mode is started.
+Whenever termiante_auto_control_button is selected, a confirmation_button is available.
+If a confirmation_button is available and confirmation_yes is pressed, manual_mode is started.
+If a confirmation_button is available and confirmation_no is pressed, auto_control_mode is still running.
+If a confirmation_button is available and confirmation_yes is pressed, next confirmation_yes is disabled.
+If a confirmation_button is available and confirmation_no is pressed, next confirmation_no is disabled.
+If termianting_auto_control_button is pressed, next termianting_auto_control_button is disabled.
+When a start_auto_control_button is enabled, start_auto_control_button is enabled, until it is pressed.
+if arterial_line or pulse_wave or cuff can be available, then blood_pressure is available.
+If cuff and arterial_line and pulse_wave are not available in 60 seconds, next manual_mode is started.

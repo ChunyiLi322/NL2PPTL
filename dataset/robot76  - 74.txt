@@ -1,0 +1,74 @@
+If  r1 is true, the robot can move to r1 or r2 or r4.
+If  r2 is true, the robot  can move to r2 or r3 or r5.
+If  r3 is true, the robot  can move to r3 or r2 or r6.
+If  r4 is true, the robot  can move to r4 or r1 or r5.
+If  r5 is true, the robot  can move to r5 or r2 or r4 or r6.
+If  r6 is true, the robot  can move to r6 or r3 or r5.
+Person is not available, until r1 or r6 becomes true.
+Medic is not available, until r3 or r4 becomes true.
+If person is available, next carryPerson will be available.
+if carryPerson is available, it will be available, until medic is available.
+Initially r22 or r33 or r44 or r55 or r66  or r11 is not available, and r66 is available.
+If  r11 is true, the robot can move to r11 r22 or r44.
+If  r22 is true, the robot  can move to r22 r33 or r55.
+If  r33 is true, the robot  can move to r33 r22 or r66.
+If  r44 is true, the robot  can move to r44 r11 or r55.
+If  r55 is true, the robot  can move to r55 r22 or r44 or r66.
+If  r66 is true, the robot  can move to r66 r33 or r55.
+Person is not available, until r11 or r66 becomes true.
+Medic is not available, until r33 or r44 becomes true.
+If person is available, next carryPerson will be available.
+if carryPerson is available, it will be available, until medic is available.
+r11 is not true, or r1 is not true.
+r22 is not true, or r2 is not true.
+r33 is not true, or r3 is not true.
+r44 is not true, or r4 is not true.
+r55 is not true, or r5 is not true.
+r66 is not true, or r6 is not true.
+Initially r2 or r3 or r4  is not available, and r1 is available.
+If  r1 is true, the robot can move to r1 or r2 or r3.
+If  r2 is true, the robot  can move to r2 or r1 or r4.
+If  r3 is true, the robot  can move to r3 or r1 or r4.
+If  r4 is true, the robot  can move to r4 or r2 or r3.
+Person is not available, until r1 or r3 becomes true.
+Medic is not available, until r2 or r4 becomes true.
+If person is available, next carryPerson will be available.
+if carryPerson is available, it will be available, until medic is available.
+the robot moves to r1, or carryPerson is true.
+the robot moves to r3, or carryPerson is true.
+if carryPerson is available, then moves to r2 or r4.
+If  r1 is true, the robot can move to r1 or r2 or r4.
+If  r2 is true, the robot  can move to r2 or r3 or r5.
+If  r3 is true, the robot  can move to r3 or r2 or r6.
+If  r4 is true, the robot  can move to r4 or r1 or r5.
+If  r5 is true, the robot  can move to r5 or r2 or r4 or r6.
+If  r6 is true, the robot  can move to r6 or r3 or r5.
+Person is not available, until r1 or r6 becomes true.
+Medic is not available, until r3 or r4 becomes true.
+If person is available, next carryPerson will be available.
+if carryPerson is available, it will be available, until medic is available.
+Initially r22 or r33 or r44 or r55 or r66  or r11 is not available, and r66 is available.
+If  r11 is true, the robot can move to r11 r22 or r44.
+If  r22 is true, the robot  can move to r22 r33 or r55.
+If  r33 is true, the robot  can move to r33 r22 or r66.
+If  r44 is true, the robot  can move to r44 r11 or r55.
+If  r55 is true, the robot  can move to r55 r22 or r44 or r66.
+If  r66 is true, the robot  can move to r66 r33 or r55.
+Person is not available, until r11 or r66 becomes true.
+Medic is not available, until r33 or r44 becomes true.
+If person is available, next carryPerson will be available.
+if carryPerson is available, it will be available, until medic is available.
+r11 is not true, or r1 is not true.
+r22 is not true, or r2 is not true.
+r33 is not true, or r3 is not true.
+r44 is not true, or r4 is not true.
+r55 is not true, or r5 is not true.
+r66 is not true, or r6 is not true.
+If  r1 is true, the robot can move to r1 r2 or r5.
+If  r2 is true, the robot  can move to r2 r3 or r1.
+If  r3 is true, the robot  can move to r3 r2 or r4.
+If  r4 is true, the robot  can move to r4 r3 or r5.
+If  r5 is true, the robot  can move to r5 r1 or r4.
+Person is not available, until r1 or r4 becomes true.
+Medic is not available, until r3 or r2 becomes true.
+If person is available, next carryPerson will be available.
